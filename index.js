@@ -1,5 +1,4 @@
 require('dotenv').config()
-const http = require('http')
 
 const express = require('express')
 const morgan = require('morgan')
@@ -17,45 +16,11 @@ const requestLogger = (request, response, next) => {
   next()
 }
 
-const { response } = require('express')
-
 // ÄLÄ KOSKAAN TALLETA SALASANOJA GitHubiin!
-/* const url =
-  `mongodb+srv://fullstack:<password>@cluster0.o1opl.mongodb.net/noteApp?retryWrites=true&w=majority`
- */
-
-
-/* let persons = [
-  {
-    id: 1,
-    name: "Arto Hellas",
-    number: "040-123456",
-  }, {
-    id: 2,
-    name: "Ada Lovelace",
-    number: "39-44-5323523",
-  }, {
-    id: 3,
-    name: "Dan Abramov",
-    number: "12-43-234345",
-  }, {
-    id: 4,
-    name: "Mary Poppendick",
-    number: "39-23-6423122",
-  }] */
-
-/*
-const app = http.createServer((request, response) => {
-response.writeHead(200, { 'Content-Type': 'application/json' })
-response.end(JSON.stringify(notes))
-})
-*/
-
-
 
 
 app.use(cors())
-morgan.token('body', (request, reponse) => { return JSON.stringify(request.body) })
+morgan.token('body', (request) => { return JSON.stringify(request.body) })
 app.use(morgan(':method :url :status :res[content-length] - :response-time ms :body'))
 
 app.use(express.static('build'))
@@ -65,21 +30,21 @@ app.use(requestLogger)
 
 
 //get all
-app.get("/api/persons", (req, response) => {
+app.get('/api/persons', (req, response) => {
   Person.find({}).then(people => {
     response.json(people)
   })
 })
 
 //get by id
-app.get("/api/persons/:id", (request, response, next) => {
+app.get('/api/persons/:id', (request, response, next) => {
   Person.findById(request.params.id).then(person => {
     response.json(person)
   }).catch(error => next(error))
 })
 
 //get info
-app.get("/info", (request, response) => {
+app.get('/info', (request, response) => {
   Person.find({}).then(people => {
     response.send(`<p>Phonebook has info for ${people.length} people.</p><br/><p>${new Date()}</p>`)
   })
@@ -88,20 +53,14 @@ app.get("/info", (request, response) => {
 //delete
 app.delete('/api/persons/:id', (request, response, next) => {
   const id = request.params.id
-  Person.deleteOne({ _id: id }).then((result) => {
+  Person.deleteOne({ _id: id }).then(() => {
     response.status(204).end()
   }).catch(error => next(error))
 })
 
 
-const generateId = () => {
-  Person.find({}).then((people) => {
-    return Math.max(...people.map(n => n.id)) + 1
-  })
-}
-
 //create new
-app.post("/api/persons", (request, response, next) => {
+app.post('/api/persons', (request, response, next) => {
   const body = request.body
 
   if (!body.name || !body.number) {
@@ -121,7 +80,7 @@ app.post("/api/persons", (request, response, next) => {
 })
 
 //update
-app.put("/api/persons/:id", (request, response, next) => {
+app.put('/api/persons/:id', (request, response, next) => {
   const { name, number } = request.body
 
   console.log(request.body)
@@ -131,7 +90,7 @@ app.put("/api/persons/:id", (request, response, next) => {
     { name, number },
     { new: true, runValidators: true, context: 'query' }
   )
-    .then(result => {
+    .then(() => {
       response.json(request.body)
     })
     .catch(error => next(error))
@@ -148,7 +107,7 @@ app.use(unknownEndpoint)
 const errorHandler = (error, request, response, next) => {
   console.log(error.message)
 
-  if (error.name === "CastError") {
+  if (error.name === 'CastError') {
     return response.status(400).send({ error: 'malformmated id' })
   } else if (error.name === 'ValidationError') {
     return response.status(400).json({ error: error.message })
